@@ -1,0 +1,41 @@
+name: Supabase official daily read
+
+on:
+  schedule:
+    - cron: "17 12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-official-daily-read
+  cancel-in-progress: false
+
+jobs:
+  database-read:
+    # No runner is allocated in a private repository, fork or before approval.
+    if: ${{ github.repository == 'rosilacerdino/Projeto919-Monitoramento' && toJSON(github.event.repository.private) == 'false' && vars.P919_MONITOR_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    defaults:
+      run:
+        working-directory: scripts/supabase-health
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "24"
+      - name: Install isolated database client
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Test safeguards without network
+        run: npm test
+      - name: Confirm actual PostgreSQL read
+        env:
+          P919_DB_HOST: ${{ secrets.P919_DB_HOST }}
+          P919_DB_PASSWORD: ${{ secrets.P919_DB_PASSWORD }}
+        run: npm run check

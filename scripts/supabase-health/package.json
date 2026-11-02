@@ -1,0 +1,13 @@
+{
+  "name": "projeto919-supabase-health",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node check.mjs",
+    "test": "node --test check.test.mjs"
+  },
+  "dependencies": {
+    "postgres": "3.4.7"
+  }
+}
